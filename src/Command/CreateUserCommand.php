@@ -67,7 +67,7 @@ class CreateUserCommand extends Command
             'If you prefer to not use this interactive wizard, provide the',
             'arguments required by this command as follows:',
             '',
-            ' $ php bin/console app:add-user username email@example.com password',
+            ' $ php bin/console app:create-user username email@example.com password',
             '',
             'Now we\'ll ask you for the value of all the missing command arguments.',
         ]);
