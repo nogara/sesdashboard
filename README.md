@@ -13,3 +13,25 @@ Documentation available at https://sesdashboard.readthedocs.io/
 ![SesDashboard Dashboard Screen](docs/images/sesdashboard-dashboard.png)
 ![SesDashboard Activity Screen](docs/images/sesdashboard-activity.png)
 ![SesDashboard Email Details](docs/images/sesdashboard-email-details.png)
+
+# Building the Docker images
+
+To build the Docker images, run the following command:
+
+```bash
+
+# Build the fpm image
+docker buildx build \
+    --platform linux/amd64 \
+    -t nogara/sesdashboard \
+    -f Dockerfile.fpm \
+    --progress plain  .
+
+# Build the nginx image
+docker buildx build \
+    --platform linux/amd64 \
+    -t nogara/sesdashboard-nginx \
+    -f Dockerfile.nginx \
+    --progress plain  .
+
+```
