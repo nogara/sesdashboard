@@ -1,0 +1,25 @@
+FROM phpdockerio/php:8.1-fpm
+WORKDIR "/application"
+
+RUN apt-get update; \
+    apt-get -y --no-install-recommends install \
+        git \
+        gettext \
+        php8.1-gd \
+        php8.1-intl \
+        php8.1-mysql \
+        php8.1-yaml; \
+    apt-get clean; \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/*
+
+COPY ./phpdocker/php-fpm/php-ini-overrides.ini /etc/php/8.1/fpm/conf.d/99-overrides.ini
+
+COPY composer.* ./
+RUN composer install --prefer-dist --no-scripts --no-dev && rm -rf /root/.composer
+
+COPY . /application
+
+COPY ./phpdocker/php-fpm/startup.sh /usr/local/bin/startup.sh
+RUN chmod +x /usr/local/bin/startup.sh
+
+CMD ["/usr/local/bin/startup.sh" ]
