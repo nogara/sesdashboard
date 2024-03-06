@@ -1,4 +1,4 @@
 #!/bin/bash
 
 set -e
-/application/bin/console app:create-user ${ADMIN_USERNAME} ${ADMIN_EMAIL} ${ADMIN_PASSWORD}
+/application/bin/console app:create-user ${ADMIN_USERNAME} ${ADMIN_EMAIL} ${ADMIN_PASSWORD} --admin --ignore-if-exists
