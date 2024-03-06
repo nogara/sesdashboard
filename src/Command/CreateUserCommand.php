@@ -48,6 +48,7 @@ class CreateUserCommand extends Command
             ->addArgument('email', InputArgument::OPTIONAL, 'The email of the new user')
             ->addArgument('password', InputArgument::OPTIONAL, 'The plain password of the new user')
             ->addOption('admin', null, InputOption::VALUE_NONE, 'If set, the user is created as an administrator')
+            ->addOption('ignore-if-exists', null, InputOption::VALUE_NONE, 'If set, the command will ignore the user if it already exists');
         ;
     }
 
@@ -111,9 +112,17 @@ class CreateUserCommand extends Command
         $email = $input->getArgument('email');
         $plainPassword = $input->getArgument('password');
         $isAdmin = $input->getOption('admin');
+        $ignoreIfExists = $input->getOption('ignore-if-exists');
+
+        // check if user exists, and if it does and 'ignore-if-exists' option is set, then return
+        if ($ignoreIfExists) {
+            if ($this->checkIfUserExists($email)) {
+                return 0;
+            }
+        }
 
         // make sure to validate the user data is correct
-        $this->validateUserData($username, $email, $plainPassword);
+        $this->validateUserData($username, $email, $plainPassword, $ignoreIfExists);
 
         // create the user and encode its password
         $user = new User();
@@ -133,12 +142,23 @@ class CreateUserCommand extends Command
         return 0;
     }
 
-    private function validateUserData($username, $email, $plainPassword): void
+    private function checkIfUserExists($email): bool
+    {
+        $existingUser = $this->users->findOneBy(['email' => $email]);
+
+        if (null !== $existingUser) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private function validateUserData($username, $email, $plainPassword, $ignoreIfExists=false): void
     {
         // first check if a user with the same email already exists.
         $existingUser = $this->users->findOneBy(['email' => $email]);
 
-        if (null !== $existingUser) {
+        if (null !== $existingUser && !$ignoreIfExists) {
             throw new RuntimeException(sprintf('There is already a user registered with the "%s" email.', $email));
         }
 
@@ -180,6 +200,8 @@ The <info>%command.name%</info> command creates new users and saves them in the 
 By default the command creates regular users. To create administrator users,
 add the <comment>--admin</comment> option:
   <info>php %command.full_name%</info>username email password <comment>--admin</comment>
+If you want to ignore the user if it already exists, add the <comment>--ignore-if-exists</comment> option:
+  <info>php %command.full_name%</info>username email password <comment>--ignore-if-exists</comment>
 If you omit any of the three required arguments, the command will ask you to
 provide the missing values.
 HELP;
